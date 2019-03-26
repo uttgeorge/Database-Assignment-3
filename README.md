@@ -1,6 +1,6 @@
-##Database-Assignment-3
+## Database-Assignment-3
 
-###Abstract
+### Abstract
 
 The assignment is about to normalize database, create index to enhance the performance of the user case, create 5 functions and 5 procedures.
 
