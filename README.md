@@ -216,7 +216,7 @@ Based on EFF of each player, user want to know what were the teams that top 10 p
 >ORDER BY eff DESC
 >LIMIT 10;  
 >```
-Result:
+Result:\
 | Player                | eff                | Team | win_percentage |
 |-----------------------|--------------------|------|----------------|
 | Anthony Davis         | 32.900000000000006 | NOP  |         0.5854 |
@@ -242,7 +242,7 @@ Create a view to show the average eff of each age
 >    group by age
 >    order by age ASC;
 >```
-Result:
+Result:\
 | age  | eff                |
 |------|--------------------|
 |   21 |  5.916666666666665 |
@@ -279,7 +279,7 @@ Create a view to show the salaries of all-stars, AND their current team
 >		FROM nba_salary
 >        WHERE Allstar = 'True';
 >```
-Result:
+Result:\
 | Player                | Team | Salary   |
 |-----------------------|------|----------|
 | Stephen Curry         | GSW  | 34682550 |
@@ -343,7 +343,7 @@ What are the most liked Tweets for every top 10 popular Teams
 >	group by team
 >	) p on n.likes = p.lk; 
 >```
-Result (Only show first 5):
+Result (Only show first 5):\
 | team                  | Tweets                                                                                                                     | likes |
 |-----------------------|----------------------------------------------------------------------------------------------------------------------------|-------|
 | Boston Celtics        | RAISE IT UP JT 🏆 https://t.co/yKDin52NdO                                                                                    | 11160 |
@@ -367,7 +367,7 @@ What is the most popular hashtag
 >ORDER BY Count DESC
 >LIMIT 20;
 >```
-Result:
+Result:\
 | hashtag            | N  |
 |--------------------|----|
 | RipCity            |  3 |
@@ -528,7 +528,7 @@ Test:
 >```mysql
 >SELECT callsalary('John','Wall');
 >```
-Result:
+Result:\
 | callsalary('John','Wall') |
 |---------------------------|
 |                  18063850 |
@@ -560,14 +560,14 @@ Test:
 >```mysql
 >SELECT ifallstar('John','Wall') "1 is true,0 is false";
 >```
-result:
+result:\
 | 1 is true,0 is false |
 |----------------------|
 |                    1 |
 >```mysql
 >SELECT ifallstar('Amir','Johnson') "1 is true,0 is false";
 >```
-Result:
+Result:\
 | 1 is true,0 is false |
 |----------------------|
 |                    0 |
@@ -595,7 +595,7 @@ Test:
 >```mysql
 >select commonhashtag();
 >```
-Result:
+Result:\
 | commonhashtag() |
 |-----------------|
 | Knicks          |
@@ -627,7 +627,7 @@ Test:
 >```mysql
 >SELECT poptweet('ATL');
 >```
-Result:
+Result:\
 | poptweet('ATL')                              |
 |----------------------------------------------|
 | @BleacherReport admiring our twitter account |
@@ -660,7 +660,7 @@ Test:
 >```mysql
 >SELECT bestplayer('HOU');
 >```
-Result:
+Result:\
 | bestplayer('HOU') |
 |-------------------|
 | James Harden      |
@@ -696,7 +696,7 @@ Test:
 >```mysql
 >CALL teamtweets('ATL');
 >```
-Result(Only show first 10):
+Result(Only show first 10):\
 | Tweets                                                                                                                                        | Account          |
 |-----------------------------------------------------------------------------------------------------------------------------------------------|------------------|
 | RT @ESPNNBA: Trae Young didn't even cross half court before throwing this alley-oop 😳
@@ -746,7 +746,7 @@ Test:
 >```mysql
 >CALL allstarsalary();
 >```
-Result:
+Result:\
 | FirstName    | LastName      | Salary   |
 |--------------|---------------|----------|
 | Kristaps     | Porzingis     |  4503600 |
@@ -791,16 +791,16 @@ Test:
 >```mysql
 >CALL explainDatabase();
 >```
-Result:
+Result:\
 | Database           |
 |--------------------|
 | Basketball         |
 | information_schema |
 | mysql              |
 | performance_schema |
-| sys                |
+| sys                |\
 
-5 rows in set (0.00 sec)
+5 rows in set (0.00 sec)\
 
 
 | Tables_in_basketball |
@@ -826,9 +826,9 @@ Result:
 | teamnames            |
 | teamstats            |
 | top_players_team     |
-| Tweets               |
+| Tweets               |\
 
-22 rows in set (0.01 sec)
+22 rows in set (0.01 sec)\
 
 
 | TABLE_NAME           | COLUMN_NAME             | DATA_TYPE  |
@@ -1017,7 +1017,7 @@ Test:
 >```mysql
 >CALL tenpophash();
 >```
-Result:
+Result:\
 | hashtag            | counts |
 |--------------------|--------|
 | Knicks             |      3 |
@@ -1050,7 +1050,7 @@ Test:
 >```mysql
 >CALL popaccount();
 >```
-Result:
+Result:\
 | account          | pop    |
 |------------------|--------|
 | @Warriors        | 407761 |
