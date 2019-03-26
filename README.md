@@ -1,1038 +1,1167 @@
-# Database-Assignment-3
+##Database-Assignment-3
 
-## Abstract
+###Abstract
+
 The assignment is about to normalize database, create index to enhance the performance of the user case, create 5 functions and 5 procedures.
 
-## Normal Form
+## Normalization
 ### 1NF
-*Table 1: allstar_games*
->Use explain and select * to see the general information of the entity
+**Requirement:**
+1. No repeating groups
+2. Atomic
+3. Each field has a unique name
+4. Primary key
+
+*Table 1: teamnames*
 >```mysql
->EXPLAIN allstar_games;
->
->SELECT * FROM allstar_games LIMIT 10; 
+>ALTER TABLE teamnames
+>ADD CONSTRAINT pk_teamnames
+>PRIMARY KEY teamnames(Team(25));
 >```
-> Primary key is GAME_ID and there are no multiple value in single attribute.\
-> Therefor 1NF is satisfied.
+>Primary key is pk_teamnames, teamnames table is in 1NF
 
-*Table 2:*
-> After viewing the details, primary key is the combination of GAME_ID and PLAYER_ID.\
-Multiple value are found in some field while FIC and REB are calculated value(This is for 2NF, spotting them is easy and save time when modify it together)
+*Table 2: Detail*
 >```mysql
->CREATE TABLE allstar_roaster_temp AS
->  SELECT STATUS, POSITION,
->         SUBSTRING_INDEX(`FGM-A`, '-', 1) AS FGM,SUBSTRING_INDEX(`FGM-A`, '-', -1) AS FGA,
->         SUBSTRING_INDEX(`FG3M-A`, '-', 1) AS FG3M,SUBSTRING_INDEX(`FG3M-A`, '-', -1) AS FG3A,
->         SUBSTRING_INDEX(`FTM-A`, '-', 1) AS FTM,SUBSTRING_INDEX(`FTM-A`, '-', -1) AS FTA,
->         OREB,DREB,AST, PF, STL, TOV, BLK, PTS, GAME_ID,PLAYER_ID
->         FROM allstar_roaster;
+>ALTER TABLE Detail
+>ADD Personid INT UNIQUE AUTO_INCREMENT;
+>ALTER TABLE Detail
+>ADD CONSTRAINT pk_Detail
+>PRIMARY KEY(Personid);
 >```
-> Now drop the old table and rename the temp table after check the entity again.\
-> After Modification, the table is 1NF 
-
-*Table 3: draft_history:*
-> After viewing the details, primary key is DRAFT_ID.\
-> 1NF is satisfied.
-
-*Table 4: game_by_team:*
-> After viewing the details, primary key is the combination of GAME_ID and TEAM_ID.\
-> 1NF is satisfied.
-
-*Table 5: hashtag:*
-> After viewing the details, primary key is ID.\
-> 1NF is satisfied.
-
-*Table 6: player_id:*
-> After viewing the details, primary key is PLAYER_ID.\
-> 1NF is satisfied.
-
-*Table 7: player_info:*
-> After viewing the details, primary key is RECORD_ID.\
-> 1NF is satisfied.
-
-*Table 8: player_regular_totalstats:*
-> After viewing the details, primary key is STATS_ID.\
-> 1NF is satisfied.
-
-*Table 9: teams:*
-> After viewing the details, primary key is ID.\
-> 1NF is satisfied.
-
-*Table 10: tweets:*
-> After viewing the details, primary key is TWEET_ID.\
-> 1NF is satisfied.
-
-*Table 11: twitter_account:*
-> After viewing the details, primary key is USER_ID.\
-> 1NF is satisfied.
-
-### 2nd form of normalization
-*Table 1: allstar_games*
-> There is no calculated value in this entity.\
-> partial dependency does not exist for this entity.\
-> Therefor 2NF is satisfied.
-
-*Table 2:*
-> There is no calculated value in this entity.\
-> partial dependency does not exist for this entity.\
-> Therefor 2NF is satisfied.
-
-*Table 3: draft_history:*
-> There is no calculated value in this entity.\
-> partial dependency exist for this entity.\
-> Player name can be represent with player id.
->```mysql-sql
->alter table draft_history drop column PLAYER_NAME;
->```
-> After modification 2NF is satisfied.
-
-*Table 4: game_by_team:*
-> Some percentage fields are calculated value.
+>Create primary key for Detail table: pl_Detail
 >```mysql
->alter table games_by_teams drop column FG_PCT;
->alter table games_by_teams drop column FG3_PCT;
->alter table games_by_teams drop column FT_PCT;
->alter table games_by_teams drop column REB;
->alter table games_by_teams drop column PLUS_MINUS;
+>Alter TAble Detail 
+>ADD COLUMN FirstName varchar(50), 
+>ADD COLUMN LastName varchar(50);
+>UPDATE Detail 
+>SET FirstName = SUBSTRING_INDEX(PlayerName, " ", 1) , LastName = SUBSTRING_INDEX(PlayerName, " ", -1);
 >```
-> Team information such as abbreviation and name is depend on team ID.
+>To make the table atomic
 >```mysql
->alter table games_by_teams drop column TEAM_ABBREVIATION;
->alter table games_by_teams drop column TEAM_NAME;
+>ALTER TABLE Detail 
+>DROP COLUMN PlayerName;
 >```
-> After modification 2NF is satisfied.
+>No repeating groups.\
+>Detail table is in 1NF
 
-*Table 5: hashtag:*
-> There is no calculated value in this entity.\
-> partial dependency does not exist for this entity.\
-> Therefor 2NF is satisfied.
-
-*Table 6: player_id:*
-> There is no calculated value in this entity.\
-> partial dependency does not exist for this entity.\
-> Therefor 2NF is satisfied.
-
-*Table 7: player_info:*
-> There is no calculated value in this entity.\
-> partial dependency exist for this entity.\
-> Player name can be represent with player id.
+*Table 3: Stats*
 >```mysql
->alter table player_info drop column PLAYER_NAME;
+>ALTER TABLE Stats
+>ADD CONSTRAINT pk_Stats
+>PRIMARY KEY(Personid);
 >```
-> After modification 2NF is satisfied.
-
-*Table 8: player_regular_totalstats:*
-> Drop team id and league id because it is not static for each player.\
+>Create primary key for the table.
 >```mysql
->alter table player_regular_totalstats drop column LEAGUE_ID;
->alter table player_regular_totalstats drop column TEAM_ID;
+>ALTER TABLE Stats
+>DROP COLUMN Player,
+>DROP COLUMN Team;
 >```
-> Some percentage fields are calculated value. Rebound can not be dropped because some player do't have DREB nor OREB.
+>No repeating groups.\
+>Table 3 is in 1NF
+
+*Table 4: Salary*
 >```mysql
->alter table player_regular_totalstats drop column FG_PCT;
->alter table player_regular_totalstats drop column FG3_PCT;
->alter table player_regular_totalstats drop column FT_PCT;
+>ALTER TABLE Salary
+>ADD CONSTRAINT pk_Salary
+>PRIMARY KEY(Personid);
 >```
->No partial dependency for this entity.\
-> After modification 2NF is satisfied.
-
-*Table 9: teams:*
-> There is no calculated value in this entity.\
-> partial dependency does not exist for this entity.\
-> Therefor 2NF is satisfied.
-
-*Table 10: tweets:*
-> No calculated field for this entity.
-> Account name and account type is depend on user id.
+>Create primary key for Salary table as pk_Salary
 >```mysql
->alter table tweets drop column USER_NAME;
->alter table tweets drop column TYPE;
+>Alter table Salary
+>DROP COLUMN Player,
+>DROP COLUMN Team;
 >```
-> After modification 2NF is satisfied.
+>No repeating groups\
+>Table 4 is in 1NF
 
-*Table 11: twitter_account:*
-> There is no calculated value in this entity.\
-> partial dependency does not exist for this entity.\
-> Therefor 2NF is satisfied.
-
-### 3rd form of normalization
-*Table 1: allstar_games*
-> There is no transitive dependency with in this entity
-> Therefor 3NF is satisfied.
-
-*Table 2:*
-> There is no transitive dependency with in this entity
-> Therefor 3NF is satisfied.
-
-*Table 3: draft_history:*
-> Team information is depend on the non-primary value team
+*Table 5: teamstats*
 >```mysql
->alter table draft_history drop column TEAM_CITY;
->alter table draft_history drop column TEAM_NAME;
->alter table draft_history drop column TEAM_ABBREVIATION;
+>ALTER TABLE teamstats
+>add constraint pk_teamstats
+>primary key (Team(255));
 >```
->Dropping the values are fine since they are also stored in teams entity.
-After modifying, the entity is in 3NF.
+>Create primary key for teamstats\
+>The table is in 1NF
 
-*Table 4: game_by_team:*
-> There is no transitive dependency with in this entity
-> Therefor 3NF is satisfied.
-
-*Table 5: hashtag:*
-> There is no transitive dependency with in this entity
-> Therefor 3NF is satisfied.
-
-*Table 6: player_id:*
-> There is no transitive dependency with in this entity
-> Therefor 3NF is satisfied.
-
-*Table 7: player_info:*
-> There is no transitive dependency with in this entity
-> Therefor 3NF is satisfied.
-
-*Table 8: player_regular_totalstats:*
-> There is no transitive dependency with in this entity
-> Therefor 3NF is satisfied.
-
-*Table 9: teams:*
-> There is no transitive dependency with in this entity
-> Therefor 3NF is satisfied.
-
-*Table 10: tweets:*
-> There is no transitive dependency with in this entity
-> Therefor 3NF is satisfied.
-
-*Table 11: twitter_account:*
-> There is no transitive dependency with in this entity
-> Therefor 3NF is satisfied.
-
-### View for use cases
-a. Find the most accurate three pointer shooter after 1995 where the person need has at least 100 attempts.<br/>
+*Table 6: nba_twitter_account*
 >```mysql
->CREATE OR REPLACE VIEW top_10_f3pct AS
->       -- Find the most accurate three pointer shooter after 1995 where the person need has at least 100 attempts.
->SELECT FULL_NAME,
->       FG3M,
->       FG3A,
->       -- Three pointer percentage =  made/attempts
->       FG3M / FG3A F3PCT,
->       PTS
->FROM (SELECT pi1995.FULL_NAME,
->             prt.PLAYER_ID,
->             -- Game played
->             prt.GP,
->             -- Game Started
->             prt.GS,
->             -- Min played
->             prt.MIN,
->             -- Field goal made
->             prt.FGM,
->             -- Field goal attempt
->             prt.FGA,
->             -- Three pointer made
->             prt.FG3M,
->             -- Three pointer attempt
->             prt.FG3A,
->             -- Free throw made
->             prt.FTM,
->             -- Free throw attempt
->             prt.FTA,
->             -- Offensive rebound
->             prt.OREB,
->             -- Defensive rebound
->             prt.DREB,
->             -- Assist
->             prt.AST,
->             -- Block
->             prt.BLK,
->             -- Turn over
->             prt.TOV,
->             -- Personal foul
->             prt.PF,
->             -- Point
->             prt.PTS
->      FROM player_regular_totalstats prt
->                  INNER JOIN (SELECT pi.PLAYER_ID, pi.FULL_NAME, dh.SEASON
->                              FROM draft_history dh
->                                          LEFT OUTER JOIN player_id pi
->                                                          ON dh.PLAYER_ID = pi.PLAYER_ID
->                              WHERE dh.SEASON >= 1995) pi1995
->                             ON prt.PLAYER_ID = pi1995.PLAYER_ID) t
->WHERE FG3A >= 100
->ORDER BY F3PCT DESC;
+>Alter Table nba_twitter_accounts
+>add constraint account_pk
+>primary key(Account(255));
 >```
-b. Find players had most all-star appearances.
+>Create primary key for nba_twitter_account\
+>The table in is 1NF
+
+*Table 7: Tweets*
 >```mysql
->CREATE OR REPLACE VIEW all_star_appearances AS
->  -- Most All-star appearances
->SELECT pi.FULL_NAME, allstar.*
->FROM player_id pi
->       Right OUTER JOIN
->     -- Selecting player who has been in all star game for more 10 times
->       (SELECT COUNT(*) appearances, PLAYER_ID
->        FROM allstar_roaster
->        GROUP BY PLAYER_ID
->        HAVING COUNT(*) >= 10) allstar
->     On pi.PLAYER_ID = allstar.PLAYER_ID
->ORDER BY allstar.appearances DESC;
+>Alter table Tweets
+>add constraint pk_tweets
+>primary key (id);
 >```
-c. Find team with most wins since 1983
->Some fields are dropped during the normalization. Few changes need be done for this use case.
+>Create primary key for Tweets table
 >```mysql
->CREATE OR REPLACE VIEW win_post_1983 AS
->  -- Team with most wins
->SELECT teams.FULL_NAME, win.*
->FROM teams
->       RIGHT JOIN (SELECT COUNT(*)              WINS,
->                          SUM(PTS)              TotalPTS,
->                          SUM(OREB) + SUM(DREB) TotalREB,
->                          SUM(AST)              TotalAST,
->                          SUM(STL)              TotalSTL,
->                          SUM(BLK)              TotalBLK,
->                          SUM(TOV)              TotalTOV,
->                          MIN(GAME_DATE)        Since,
->                          TEAM_ID
->                   FROM games_by_teams gt
->                   WHERE WL = "W"
->                   GROUP BY TEAM_ID, WL
->                   ORDER BY WINS Desc) win ON teams.ID = win.TEAM_ID;
+>ALTER TABLE Tweets
+>DROP COLUMN team;
 >```
-d. Find the most active player on twitter with their popularity
+>>No repeating groups\
+>Table 7 is in 1NF
+
+*Table 8: Hashtag*
+>```mysql
+>SELECT count(id) FROM Basketball.hashtags;
+>DROP TABLE Hashtag;
+>CREATE TABLE TEMP AS
+>SELECT id,N1 as ht FROM hashtags
+>UNION
+>SELECT id,N2 as ht FROM hashtags
+>UNION
+>SELECT id,N3 as ht FROM hashtags;
+>DELETE FROM TEMP 
+>WHERE ht='';
+>CREATE TABLE Hashtag AS
+>SELECT * FROM TEMP WHERE ht!='' or ht is not null;
+>DROP TABLE TEMP;
+>```
+>Combine 3 columns of hashtags into 1 column, delete all repeating groups.
+>```mysql
+>ALTER TABLE Hashtag
+>ADD CONSTRAINT pk_hashtag
+>PRIMARY KEY (id,ht(255));
+>```
+>Create primary key for the table.\
+>The table is in 1NF
+
+### 2NF
+**Requirement:**
+1. Already 1NF
+2. No partial dependencies
+3. No calculated data
+
+>1.All the table are in 1NF\
+>2.Hashtag table do not have non-key attributes, and other tables only have one primary key, So there is no partial dependency.\
+>3.All table do not have calculated data.
+
+### 3NF
+**Requirement:**
+1. Already 2NF
+2. No transitive dependencies
+
+*Table 1: teamnames*
+> Already in 3NF
+
+*Table 2: Detail*
+> Already in 3NF 
+
+*Table 3: Stats*
+>```mysql
+>ALTER TABLE Stats
+>DROP COLUMN Player,
+>DROP COLUMN Team;
+>```
+>Because Team is depends on Players, and Player is depends on Personid. \
+>Now Table 3 is in 3NF
+
+*Table 4: Salary*
+>```mysql
+>Alter table Salary
+>DROP COLUMN Player,
+>DROP COLUMN Team;
+>```
+>The reason is as same as it for table 4.\
+>Table 4 is in 3NF
+
+*Table 5: teamstats*
+> Already in 3NF
+
+*Table 6: nba_twitter_account*
+> Already in 3NF
+
+*Table 7: Tweets*
 
 >```mysql
->CREATE OR REPLACE VIEW player_tweets_popularity AS
->  -- Present with likes/tweet
->SELECT twitter_accounts.FULL_NAME, likes.*
->FROM twitter_accounts
->       LEFT JOIN (SELECT USER_ID,
->                         COUNT(*)                       AS Total_TWEET,
->                         SUM(FAVORITE_COUNT)            AS Total_FAV,
->                         SUM(FAVORITE_COUNT) / COUNT(*) AS FAVORITE_PER_TWEET
->                  FROM tweets
->                  GROUP BY USER_ID
->                  ORDER BY FAVORITE_PER_TWEET DESC) likes ON twitter_accounts.USER_ID = likes.USER_ID
->WHERE ACCOUNT_TYPE = 'player';
+>ALTER TABLE Tweets
+>DROP COLUMN team;
 >```
-e. Find what hashtag each nba player uses most frequently.
+> Same reason.\
+>Table 7 is in 3NF
+
+*Table 8: Hashtag*
 >```mysql
->CREATE OR REPLACE VIEW hashtag_frequency AS
->SELECT HASHTAG, temp.USER_NAME, MAX(temp.TYPE) TYPE, COUNT(*) times
+> Already in 3NF
+
+
+## Users cases' views
+##### User Case 1:
+Based on EFF of each player, user want to know what were the teams that top 10 players served and their teams' performance
+>```mysql
+>CREATE OR REPLACE VIEW Top_Players_Team AS
+>SELECT 
+>	-- NAME OF PLAYER
+>        p.Player
+>	-- EFF IS ((Points + Rebounds + Assists + Steals + Blocks) - ((Field Goals Att. - Field Goals Made) + (Free Throws Att. - Free Throws Made) + Turnovers))
+>        ,eff
+>	-- TEAM NAMES
+>        ,t.Team_Name
+>	-- WINS / (WINS + LOSSES)
+>        ,win_percentage
+>FROM (SELECT Team_Name
+>,Team
+>,Wins / (Wins + Losses) as win_percentage
+>FROM teamstats) t
+>JOIN (SELECT Player
+>, Team
+>, ((PPG+RPG+APG+SPG+BPG)-((FGA-FGM)+(FTA-FTM)+TOV)) as eff
+>FROM player_stats) p
+>ON t.Team = p.Team
+>ORDER BY eff DESC
+>LIMIT 10;  
+>```
+Result:
+| Player                | eff                | Team | win_percentage |
+|-----------------------|--------------------|------|----------------|
+| Anthony Davis         | 32.900000000000006 | NOP  |         0.5854 |
+| LeBron James          |               32.7 | CLE  |         0.6098 |
+| Giannis Antetokounmpo | 30.799999999999997 | MIL  |         0.5366 |
+| DeMarcus Cousins      | 30.200000000000003 | NOP  |         0.5854 |
+| James Harden          | 30.199999999999992 | HOU  |         0.7927 |
+| Russell Westbrook     | 29.400000000000002 | OKC  |         0.5854 |
+| Karl-Anthony Towns    | 29.099999999999994 | MIN  |         0.5732 |
+| Kevin Durant          | 28.799999999999994 | GSW  |         0.7073 |
+| Stephen Curry         | 27.500000000000007 | GSW  |         0.7073 |
+| Andre Drummond        | 27.200000000000003 | DET  |         0.4756 |
+
+##### User Case 2:
+Create a view to show the average eff of each age 
+>```mysql
+>CREATE OR REPLACE VIEW AGE_PERF AS
+>SELECT
+>	YEAR(CURDATE()) - YEAR(DATE_FORMAT(STR_TO_DATE(pd.BirthDate, '%m/%d/%Y'), "%Y-%m-%d")) AS age,
+>    sum((ps.PPG+ps.RPG+ps.APG+ps.SPG+ps.BPG)-((ps.FGA-ps.FGM)+(ps.FTA-ps.FTM)+ps.TOV))/count(ps.Player) as eff
+>    FROM player_details pd, player_stats ps
+>    WHERE pd.PlayerName = ps.Player
+>    group by age
+>    order by age ASC;
+>```
+Result:
+| age  | eff                |
+|------|--------------------|
+|   21 |  5.916666666666665 |
+|   22 |            9.20625 |
+|   23 |  9.021052631578948 |
+|   24 | 12.517647058823528 |
+|   25 | 12.100000000000001 |
+|   26 | 14.169230769230767 |
+|   27 |  13.35217391304348 |
+|   28 |              11.05 |
+|   29 |  14.74705882352941 |
+|   30 | 14.833333333333332 |
+|   31 | 14.635294117647055 |
+|   32 |              11.27 |
+|   33 | 13.290000000000001 |
+|   34 | 15.277777777777779 |
+|   35 |             10.375 |
+|   37 | 11.599999999999996 |
+|   38 | 15.099999999999996 |
+|   39 |  8.450000000000001 |
+|   41 | 14.400000000000002 |
+
+##### User Case 3:
+Create a view to show the salaries of all-stars, AND their current team
+>```mysql
+>CREATE OR REPLACE VIEW ALL_STAR_SALARY AS
+>SELECT 
+>	-- PLAYER NAME
+>		Player,
+>	-- TEAM NAME
+>		Team,
+>	-- SALARY OF PLAYER
+>       Salary
+>		FROM nba_salary
+>        WHERE Allstar = 'True';
+>```
+Result:
+| Player                | Team | Salary   |
+|-----------------------|------|----------|
+| Stephen Curry         | GSW  | 34682550 |
+| LeBron James          | CLE  | 33285709 |
+| Kyle Lowry            | TOR  | 28703704 |
+| Russell Westbrook     | OKC  | 28530608 |
+| James Harden          | HOU  | 28299399 |
+| DeMar DeRozan         | TOR  | 27739975 |
+| Al Horford            | BOS  | 27734405 |
+| Damian Lillard        | POR  | 26153057 |
+| Kevin Durant          | GSW  | 25000000 |
+| Bradley Beal          | WAS  | 23775506 |
+| Anthony Davis         | NOP  | 23775506 |
+| Andre Drummond        | DET  | 23775506 |
+| Kevin Love            | CLE  | 22642350 |
+| Giannis Antetokounmpo | MIL  | 22471910 |
+| LaMarcus Aldridge     | SAS  | 21461010 |
+| Victor Oladipo        | IND  | 21000000 |
+| Paul George           | OKC  | 19508958 |
+| Jimmy Butler          | MIN  | 19301070 |
+| Kyrie Irving          | BOS  | 18868625 |
+| John Wall             | WAS  | 18063850 |
+| DeMarcus Cousins      | NOP  | 18063850 |
+| Klay Thompson         | GSW  | 17826150 |
+| Goran Dragic          | MIA  | 17000450 |
+| Draymond Green        | GSW  | 16400000 |
+| Kemba Walker          | CHO  | 12000000 |
+| Karl-Anthony Towns    | MIN  |  6216840 |
+| Joel Embiid           | PHI  |  6100266 |
+| Kristaps Porzingis    | NYK  |  4503600 |        
+
+
+##### User Case 4:
+Find the total likes of each teams' major twitter accounts.\
+What are the most liked Tweets for every top 10 popular Teams
+>```mysql
+>CREATE VIEW POP_TEAM AS
+>SELECT m.team,
+>	Tweets,
+>	likes
+>    From NBA_twitter n join(
+>    SELECT team,
+>	sum(likes)/count(Tweets) as pop
+>    FROM NBA_twitter
+>    group by team
+>    order by pop DESC
+>    limit 10
+>    )m on n.team = m.team
+>    order by likes DESC;
+>```
+
+>```mysql    
+>CREATE VIEW MOST_POP_TWEET AS
+>SELECT
+>	team,
+>	Tweets,
+>	likes
+>    From NBA_twitter n join(
+>    select max(likes) as lk
+>	from POP_TEAM
+>	group by team
+>	) p on n.likes = p.lk; 
+>```
+Result (Only show first 5):
+| team                  | Tweets                                                                                                                     | likes |
+|-----------------------|----------------------------------------------------------------------------------------------------------------------------|-------|
+| Boston Celtics        | RAISE IT UP JT 🏆 https://t.co/yKDin52NdO                                                                                    | 11160 |
+| Golden State Warriors | drip on 100,000 💧 https://t.co/ylURP2b3wd                                                                                   | 26647 |
+| Los Angeles Lakers    | 👀 @kylekuzma with his @ZO2_ impression https://t.co/QchoNtuboj                                                              | 19403 |
+| Oklahoma City Thunder | PAUL. GEORGE.                                                                                                              | 13198 |
+| Toronto Raptors       | For all the good times 
+For all you’ve done for this City, for Canada
+
+Thank you, @DeMar_DeRozan https://t.co/uxFLPQv1Sw   | 19331 |
+
+
+##### User Case 5:
+What is the most popular hashtag
+>```mysql
+>CREATE VIEW pop_hash AS
+>SELECT hashtag, COUNT(hashtag) AS N
 >FROM hashtags
->            LEFT JOIN (SELECT tweets.*, twitter_accounts.FULL_NAME AS USER_NAME, twitter_accounts.ACCOUNT_TYPE AS TYPE
->                       FROM tweets
->                                   LEFT JOIN twitter_accounts ON tweets.USER_ID = twitter_accounts.USER_ID) temp
->                      on hashtags.TWEET_ID = temp.TWEET_ID
->GROUP BY HASHTAG, USER_NAME;
+>WHERE (hashtag IS NOT NULL)
+>GROUP BY hashtag
+>ORDER BY Count DESC
+>LIMIT 20;
 >```
->```mysql
->CREATE OR REPLACE VIEW player_hashtag_popularity AS
->  -- Show max frequency of hashtags for each player
->SELECT maxfre.USER_NAME, hf.HASHTAG, maxfre.times
->FROM hashtag_frequency hf
->       INNER JOIN (
->  -- Find max appearance for each player
->  SELECT USER_NAME, MAX(times) times FROM hashtag_frequency hf WHERE TYPE = 'player' GROUP BY USER_NAME) maxfre
->                  ON (hf.times = maxfre.times AND hf.USER_NAME = maxfre.USER_NAME)
->ORDER BY hf.times DESC;
->```
+Result:
+| hashtag            | N  |
+|--------------------|----|
+| RipCity            |  3 |
+| Nuggets            |  3 |
+| Cavs               |  2 |
+| Knicks             |  2 |
+| GatorsHoop         |  2 |
+| NBAAllStar         |  2 |
+| Pistons            |  2 |
+| TrueToAtlanta      |  2 |
+| NBA                |  2 |
+| FearTheDeer        |  2 |
+| Sixers             |  2 |
+| WeGoHard           |  2 |
+| SunsVsJazz         |  2 |
+| WeTheNorth         |  2 |
+| IWD2019            |  2 |
+| MileHighBasketball |  2 |
+| Rockets            |  2 |
+| GoSpursGo          |  2 |
+| NEBHInjuryReport   |  1 |
+| 313Day             |  1 |
+
 
 ### Index
-##### Use case 1 
-Original performance: 
->completed in 489 ms
+##### User case 1:
+Join player detail and team stats.
+>```mysql
+>EXPLAIN SELECT player_details.*,teamstats.Points
+>FROM player_details join teamstats
+>on player_details.Team = teamstats.Team;
+>```
+Original:
+>It has to search 499 rows in details table.
 
-Now create index on player id for the join process
-```mysql
-CREATE INDEX idx_player_id_PLAYER_ID ON player_id(PLAYER_ID);
-CREATE INDEX idx_draft_history_PLAYER_ID ON draft_history(PLAYER_ID);
-```
+Now create index on Team:
+>```mysql
+>CREATE INDEX team_idx
+>on player_details(Team(25));
+>EXPLAIN SELECT player_details.*,teamstats.Points
+>FROM player_details join teamstats
+>on player_details.Team = teamstats.Team;
+>```
 Performance:
->completed in 145 ms
-##### Use case 2
-Original performance: 
->completed in 197 ms
+>Only have to search 16 rows.
 
-Now create index on player id for the join process
-```mysql
-CREATE INDEX idx_allstar_PLAYER_ID ON allstar_roaster(PLAYER_ID);
-```
+##### User case 2: 
+>```mysql
+>EXPLAIN SELECT PlayerName
+>From player_details
+>where Pos = 'C';
+>```
+Original:
+>Search 499 rows.
+
+>```mysql
+>CREATE INDEX position_idx
+>on player_details(Pos(25));
+>EXPLAIN SELECT PlayerName
+>From player_details
+>where Pos = 'C';
+>```
 Performance:
->completed in 142 ms
-##### Use case 3
-Original performance: 
->completed in 186 ms
+>Only search 69 rows. 
 
-Now create index on player id for the join process
-```mysql
-CREATE INDEX idx_games_by_teams_TEAM_ID ON games_by_teams(TEAM_ID);
-CREATE INDEX idx_games_by_teams_WL ON games_by_teams(WL);
-```
+##### User case 3: 
+>```mysql
+>explain
+>SELECT teamstats.Team,teamstats.Wins,teamstats.Losses,nba_twitter_accounts.Account
+>FROM teamstats right join nba_twitter_accounts
+>on teamstats.Team = nba_twitter_accounts.Abbr
+>Where teamstats.Wins > teamstats.Losses
+>ORDER BY Team;
+>```
+Original:
+> Search 65 rows in nba_twitter_account table.\ Time 0.0019 sec
+
+>```mysql
+>CREATE INDEX idx_tm
+>on nba_twitter_accounts(Abbr(25));
+>explain
+>SELECT teamstats.Team,teamstats.Wins,teamstats.Losses,nba_twitter_accounts.Account
+>FROM teamstats right join nba_twitter_accounts
+>on teamstats.Team = nba_twitter_accounts.Abbr
+>Where teamstats.Wins > teamstats.Losses
+>ORDER BY Team;
+>```
 Performance:
->completed in 150 ms
-##### Use case 4
-Original performance: 
->completed in 152 ms
+> Only search 2 rows.\ Time is 0.00074 sec.
 
-Now create index on player id for the join process
-```mysql
-CREATE INDEX idx_tweets_USER_ID ON tweets(USER_ID);
-CREATE INDEX idx_twitter_accounts_USER_ID ON twitter_accounts(USER_ID);
-```
+##### User case 4:
+>```mysql
+>SELECT * FROM Salary;
+>explain
+>SELECT Personid,Salary
+>FROM Salary
+>WHERE Allstar = 'True';
+>```
+Original:
+> Search 229 rows.
+
+>```mysql
+>CREATE INDEX idx_star
+>on Salary(Allstar(25));
+>explain
+>SELECT Personid,Salary
+>FROM Salary
+>WHERE Allstar = 'True';
+>```
 Performance:
->completed in 150 ms
-##### Use case 5
-Original performance: 
->completed in 152 ms and 154ms
+>Only search 23 rows.
 
-Now create index on player id for the join process
-```mysql
-CREATE INDEX idx_hashtag_TWEET_ID ON hashtags(TWEET_ID);
-CREATE INDEX idx_tweets_TWEET_ID ON tweets(TWEET_ID);
-CREATE INDEX idx_twitter_accounts_TWEET_ID ON twitter_accounts(USER_ID);
-```
+##### User case 5:
+>```mysql
+>SELECT * FROM player_details;
+>explain
+>SELECT PlayerName
+>FROM player_details
+>WHERE ExperienceYear>=8;
+>```
+Original:
+>Search 499 rows.
 
-Performance:
->completed in 142 ms and 144ms
+>```mysql
+>CREATE INDEX idx_exp
+>on player_details(ExperienceYear);
+>explain
+>SELECT PlayerName
+>FROM player_details
+>WHERE ExperienceYear>=8;
+>```
+performance:
+>Search 110 rows.
+
 
 ### Functions
-1. Find player's most frequent hashtag
-```mysql
-DELIMITER //
-CREATE FUNCTION frequentHashtag(name TEXT)
-RETURNS TEXT
-BEGIN
-  DECLARE hashtag TEXT;
-  SELECT hf.HASHTAG INTO hashtag
-  FROM hashtag_frequency hf
-         INNER JOIN (
-    -- Find max appearance for each player
-    SELECT USER_NAME, MAX(times) times FROM hashtag_frequency hf WHERE USER_NAME = name GROUP BY USER_NAME) maxfre
-                    ON (hf.times = maxfre.times AND hf.USER_NAME = maxfre.USER_NAME);
-  RETURN hashtag;
-end;
-//
-DELIMITER ;
-```
-Test case:
-```mysql
-SELECT frequentHashtag("Chris Paul");
-```
-Return:
->TeamCP3
+##### 1. Find the salary of a player
+>```mysql
+>DELIMITER //
+>CREATE FUNCTION callsalary (firstname TEXT,lastname TEXT)
+>RETURNS INT
+>BEGIN
+>	DECLARE Income INT;
+>    SELECT t.Salary INTO Income
+>    FROM (
+>		SELECT d.FirstName,d.LastName,s.Salary
+>        FROM Detail d join Salary s
+>        ON d.Personid = s.Personid
+>        WHERE d.FirstName = firstname and d.LastName = lastname
+>        )t;
+>    RETURN Income;
+>END;
+>//
+>DELIMITER ;
+>```
 
-2. Get one player's most liked tweet
-```mysql
-DELIMITER //
-CREATE FUNCTION popularTweet(userName TEXT)
-RETURNS TEXT
-BEGIN
-  DECLARE tweet_out TEXT;
-  SELECT TWEET INTO tweet_out
-  FROM (SELECT tweets.*,ta.FULL_NAME
-        FROM tweets
-               LEFT JOIN twitter_accounts ta on tweets.USER_ID = ta.USER_ID
-        WHERE ta.FULL_NAME = userName
-        ORDER BY tweets.FAVORITE_COUNT DESC
-        LIMIT 1) t;
+Test:
+>```mysql
+>SELECT callsalary('John','Wall');
+>```
+Result:
+| callsalary('John','Wall') |
+|---------------------------|
+|                  18063850 |
 
-  RETURN tweet_out;
-END
-//
-DELIMITER ;
-```
-Test case:
-```mysql
-SELECT popularTweet("Chris Paul");
-```
-Return:
-
-|   popularTweet("Chris Paul")                                                                |
-|:------------------------------------------------------------------------------------------|
-| And I doubt he's man enough to call any of those players a son of a bitch to their face... |
-
-3. Most scored player drafted on certain year
-```mysql
-DELIMITER //
-
-CREATE FUNCTION bestScorerYear(draftYear INT)
-RETURNS TEXT
-BEGIN
-  DECLARE playerName TEXT;
-  SELECT FULL_NAME INTO playerName
-  FROM (SELECT d.PLAYER_ID, d.SEASON, p.PTS
-        FROM draft_history d
-               LEFT JOIN player_regular_totalstats p ON d.PLAYER_ID = p.PLAYER_ID
-        WHERE SEASON = draftYear
-        ORDER BY PTS DESC
-       ) t
-         LEFT JOIN player_id ON t.PLAYER_ID = player_id.PLAYER_ID
-  LIMIT 1;
-
-  RETURN playerName;
-END
-//
-DELIMITER ;
-```
-Test case:
-```mysql
-SELECT bestScorerYear(2003);
-```
-Return:
-
-| bestScorerYear(2003) |
+##### 2. To check whether a player is an all-star player
+>```mysql
+>SELECT * FROM Detail;
+>DROP FUNCTION ifallstar;
+>DELIMITER //
+>CREATE FUNCTION ifallstar(firstname TEXT,lastname TEXT)
+>RETURNS Boolean
+>BEGIN 
+>	DECLARE idx TEXT;
+>    SELECT t.AllStar INTO idx
+>    FROM (
+>		SELECT d.FirstName,d.LastName,s.AllStar
+>        FROM Detail d join Salary s
+>        ON d.Personid = s.Personid
+>        WHERE d.FirstName = firstname and d.LastName = lastname
+>        )t;
+>	IF idx = 'True' THEN RETURN TRUE;
+>    ELSE RETURN FALSE;
+>    END IF;
+>END;
+>//
+>DELIMITER ;
+>```
+Test:
+>```mysql
+>SELECT ifallstar('John','Wall') "1 is true,0 is false";
+>```
+result:
+| 1 is true,0 is false |
 |----------------------|
-| LeBron James         |
-
-4. If a player is an all-star player
-```mysql
-DELIMITER //
-
-CREATE FUNCTION beenAnAllstar(playerName Text)
-RETURNS BOOLEAN
-BEGIN
-  DECLARE allstarStatus INT;
-  SELECT COUNT(*) INTO allstarStatus
-  FROM (SELECT a.PLAYER_ID, COUNT(*), p.FULL_NAME
-        FROM allstar_roaster a
-               LEFT JOIN player_id p
-                         ON a.PLAYER_ID = p.PLAYER_ID
-        GROUP BY PLAYER_ID) t
-  WHERE t.FULL_NAME = playerName;
-
--- null means no appearance, elseif for all star players, else statement is for 
-    -- non NBA players
-  IF allstarStatus IS NULL THEN RETURN FALSE;
-  ELSEIF allstarStatus > 0 THEN RETURN TRUE;
-  ELSE RETURN FALSE;
-  END IF;
-
-END;
-//
-DELIMITER ;
-```
-Test case 1:
-```mysql
-SELECT beenAnAllstar("Chris Paul");
-```
-Return:
-
-| beenAnAllstar("Chris Paul") |
-|:---------------------------:|
-|                           1 |
-
-Test case 2:
-```mysql
--- Non NBA player for testing
-SELECT beenAnAllstar("sad");
-```
-Return:
-| beenAnAllstar("sad") |
-|:--------------------:|
+|                    1 |
+>```mysql
+>SELECT ifallstar('Amir','Johnson') "1 is true,0 is false";
+>```
+Result:
+| 1 is true,0 is false |
+|----------------------|
 |                    0 |
-5. Get likes/tweet for user to see their popularity
-```mysql
-DELIMITER //
 
-CREATE FUNCTION favPerTweet(userName Text)
-RETURNS DOUBLE
-BEGIN
-  DECLARE likesPerTweet DOUBLE;
-  SELECT likes.FAVORITE_PER_TWEET INTO likesPerTweet
-  FROM twitter_accounts
-         LEFT JOIN (SELECT USER_ID, SUM(FAVORITE_COUNT) / COUNT(*) AS FAVORITE_PER_TWEET
-                    FROM tweets
-                    GROUP BY USER_ID
-                    ORDER BY FAVORITE_PER_TWEET DESC) likes ON twitter_accounts.USER_ID = likes.USER_ID
-  WHERE (ACCOUNT_TYPE = 'player' AND twitter_accounts.FULL_NAME = userName);
-  IF userName IN (SELECT FULL_NAME FROM twitter_accounts) THEN
-    RETURN likesPerTweet;
-  ELSE
-    RETURN 0;
-  END IF;
+##### 3. find the most common hashtag
+>```mysql
+>SELECT * FROM Hashtag;
+>DROP FUNCTION commonhashtag;
+>DELIMITER //
+>CREATE FUNCTION commonhashtag()
+>RETURNS TEXT
+>BEGIN 
+>	DECLARE hashtag TEXT;
+>    SELECT  ht INTO hashtag
+>    FROM Hashtag
+>    GROUP BY ht
+>    ORDER BY count(ht) DESC
+>    LIMIT 1;
+>	RETURN hashtag;
+>END;
+>//
+>DELIMITER ;
+>```
+Test:
+>```mysql
+>select commonhashtag();
+>```
+Result:
+| commonhashtag() |
+|-----------------|
+| Knicks          |
 
-END;
-//
-DELIMITER ;
-```
-Test case 1:
-```mysql
-SELECT favPerTweet("Stephen Curry");
-```
-Return:
+##### 4. find the most popular tweet of a team
+>```mysql
+>SELECT * FROM Tweets;
+>DROP FUNCTION poptweet;
+>DELIMITER //
+>CREATE FUNCTION poptweet(abbr TEXT)
+>RETURNS TEXT
+>BEGIN 
+>	DECLARE popt TEXT;
+>    SELECT a.Tweets INTO popt
+>    FROM (
+>        SELECT t.Tweets,t.likes
+>        FROM Tweets t join nba_twitter_accounts n
+>        on t.account = n.Account
+>        WHERE n.Abbr = abbr
+>        ORDER BY t.likes DESC
+>    )a
+>    limit 1;
+>	RETURN popt;
+>END;
+>//
+>DELIMITER ;
+>```
+Test:
+>```mysql
+>SELECT poptweet('ATL');
+>```
+Result:
+| poptweet('ATL')                              |
+|----------------------------------------------|
+| @BleacherReport admiring our twitter account |
 
-| favPerTweet("Stephen Curry") |
-|:----------------------------:|
-|                    4726.6536 |
+#####5. Find the best player of a team
+>```mysql
+>SELECT * FROM Stats;
+>DROP FUNCTION bestplayer; 
+>DELIMITER //
+>CREATE FUNCTION bestplayer(teamabbr TEXT)
+>RETURNS TEXT
+>BEGIN
+>	DECLARE player TEXT;
+>    SELECT CONCAT(a.FirstName, ' ', a.LastName) INTO player
+>    FROM(
+>		SELECT d.FirstName,d.LastName,d.Team,
+>        ((s.PPG+s.RPG+s.APG+s.SPG+s.BPG)-((s.FGA-s.FGM)+(s.FTA-s.FTM)+s.TOV)) as eff
+>        FROM Detail d join Stats s
+>        ON d.Personid = s.Personid
+>        ) a
+>	WHERE a.Team = teamabbr
+>    ORDER BY a.eff DESC
+>    limit 1;
+>    RETURN player;
+>END;
+>//
+>DELIMITER ;
+>```
+Test:
+>```mysql
+>SELECT bestplayer('HOU');
+>```
+Result:
+| bestplayer('HOU') |
+|-------------------|
+| James Harden      |
 
-Test case 2:
-```mysql
--- Non NBA player
-SELECT favPerTweet("Who knows this is?");
-```
-Return:
-| favPerTweet("Who knows this is?") |
-|:---------------------------------:|
-|                                 0 |
 
 ### Procedures
-1. Show general information about database
-```mysql
-DELIMITER //
-CREATE PROCEDURE explainDatabase()
-BEGIN
-  SHOW DATABASES;
 
-  SHOW TABLES;
-  
-  SELECT i.TABLE_NAME, i.COLUMN_NAME, i.IS_NULLABLE, i.DATA_TYPE, i.PRIVILEGES
-  FROM information_schema.columns i
-  WHERE table_schema = 'nba';
-  
-END;//
-DELIMITER ;
-```
-Test case:
-```mysql
-CALL explainDatabase();
-```
-Return:
+##### 1. search the tweets of a team
+>```mysql
+>SELECT * FROM Tweets;
+>SELECT * FROM nba_twitter_accounts;
+>DROP Procedure teamtweets;
+>DELIMITER //
+>CREATE PROCEDURE teamtweets(teamabbr TEXT)
+>#RETURNS TEXT
+>BEGIN 
+>	#DECLARE tweets TEXT;
+>    SELECT a.Tweets,a.Account
+>    FROM (
+>		SELECT t.Tweets,n.Account
+>        FROM Tweets t join nba_twitter_accounts n
+>        on t.account = n.Account
+>        WHERE n.Abbr = teamabbr
+>        ORDER BY n.Account        
+>    )a
+>    ;
+>	#RETURN tweets;
+>END;
+>//
+>DELIMITER ;
+>```
+Test:
+>```mysql
+>CALL teamtweets('ATL');
+>```
+Result(Only show first 10):
+| Tweets                                                                                                                                        | Account          |
+|-----------------------------------------------------------------------------------------------------------------------------------------------|------------------|
+| RT @ESPNNBA: Trae Young didn't even cross half court before throwing this alley-oop 😳
 
+(📍 @StateFarm) https://t.co/sMIYzRkTPi                   | @atl_hawksnation |
+| RT @YahooSportsNBA: Trae Young throws a 60 foot lob to John Collins!
+
+(via @ESPNNBA)
+https://t.co/lsLS3DNtyp                                  | @atl_hawksnation |
+| RT @ATLHawks: @BleacherReport admiring our twitter account                                                                                    | @atl_hawksnation |
+| Our @atlhawks win against the @memgrizz! #ATLHawks #TruetoAtlanta #HawksvsGrizzlies https://t.co/L6lpZFNmC5                                   | @atl_hawksnation |
+| RT @ATLHawks: oh
+.
+.
+.
+.
+.
+OOOOHHHH. 😱 https://t.co/WVq9MxO7sU                                                                                 | @atl_hawksnation |
+| Facebook and Instagram been tripping Alll day                                                                                                 | @atl_hawksnation |
+| @TheTraeYoung Big facts                                                                                                                       | @atl_hawksnation |
+| RT @TheTraeYoung: Whoever is trying to bring you down, is already below you💯                                                                   | @atl_hawksnation |
+| Our @atlhawks are back in action tonight against the @memgrizz. #GOHAWKS! #ATLHawks #HawksvsGrizzlies https://t.co/IVMoOlxrUF                 | @atl_hawksnation |
+| RT @HawksPR: John Collins (20 points/10 rebounds) recorded his 18th contest with at least 20 points and 10 rebounds, the fifth-most in the…   | @atl_hawksnation |
+
+
+##### 2. Show the salary of allstar players
+>```mysql
+>SELECT * FROM Salary;
+>SELECT * FROM Detail;
+>DROP Procedure allstarsalary;
+>DELIMITER //
+>CREATE PROCEDURE allstarsalary()
+>
+>BEGIN 
+>	SELECT d.FirstName, d.LastName, s.Salary
+>	FROM Salary s join Detail d
+>	on s.Personid = d.Personid
+>	WHERE s.Allstar = 'True'
+>	ORDER BY s.Salary
+>    ;
+>
+>END;
+>//
+>DELIMITER ;
+>```
+Test:
+>```mysql
+>CALL allstarsalary();
+>```
+Result:
+| FirstName    | LastName      | Salary   |
+|--------------|---------------|----------|
+| Kristaps     | Porzingis     |  4503600 |
+| Joel         | Embiid        |  6100266 |
+| Karl-Anthony | Towns         |  6216840 |
+| Draymond     | Green         | 16400000 |
+| Goran        | Dragic        | 17000450 |
+| Klay         | Thompson      | 17826150 |
+| John         | Wall          | 18063850 |
+| Kyrie        | Irving        | 18868625 |
+| Paul         | George        | 19508958 |
+| Victor       | Oladipo       | 21000000 |
+| LaMarcus     | Aldridge      | 21461010 |
+| Giannis      | Antetokounmpo | 22471910 |
+| Kevin        | Love          | 22642350 |
+| Bradley      | Beal          | 23775506 |
+| Anthony      | Davis         | 23775506 |
+| Andre        | Drummond      | 23775506 |
+| Kevin        | Durant        | 25000000 |
+| Damian       | Lillard       | 26153057 |
+| Al           | Horford       | 27734405 |
+| James        | Harden        | 28299399 |
+| Russell      | Westbrook     | 28530608 |
+| Kyle         | Lowry         | 28703704 |
+| Stephen      | Curry         | 34682550 |
+
+##### 3. SHow the datatype of the database
+>```mysql
+>DROP PROCEDURE explainDatabase;
+>DELIMITER //
+>CREATE PROCEDURE explainDatabase()
+>BEGIN
+>  SHOW DATABASES;
+>  SHOW TABLES;  
+>  SELECT info.TABLE_NAME, info.COLUMN_NAME, info.DATA_TYPE
+>  FROM information_schema.columns info
+>  WHERE table_schema = 'Basketball';  
+>END;//
+>DELIMITER ;
+>```
+Test:
+>```mysql
+>CALL explainDatabase();
+>```
+Result:
 | Database           |
 |--------------------|
+| Basketball         |
 | information_schema |
 | mysql              |
-| nba                |
 | performance_schema |
 | sys                |
-5 rows in set (0.06 sec)
 
-| Tables_in_nba             |
-|---------------------------|
-| all_star_appearances      |
-| all_star_apperances       |
-| allstar_games             |
-| allstar_roaster           |
-| draft_history             |
-| games_by_teams            |
-| hashtag_frequency         |
-| hashtags                  |
-| player_hashtag_popularity |
-| player_id                 |
-| player_info               |
-| player_regular_totalstats |
-| player_tweets_popularity  |
-| stats_post_1995           |
-| teams                     |
-| top_10_f3pct              |
-| tweets                    |
-| twitter_accounts          |
-| win_post_1983             |
-19 rows in set (0.06 sec)
+5 rows in set (0.00 sec)
 
-| TABLE_NAME                | COLUMN_NAME        | IS_NULLABLE | DATA_TYPE | PRIVILEGES                      |
-|---------------------------|--------------------|-------------|-----------|---------------------------------|
-| all_star_appearances      | FULL_NAME          | YES         | text      | select,insert,update,references |
-| all_star_appearances      | appearances        | NO          | bigint    | select,insert,update,references |
-| all_star_appearances      | PLAYER_ID          | NO          | int       | select,insert,update,references |
-| all_star_apperances       | FULL_NAME          | YES         | text      | select,insert,update,references |
-| all_star_apperances       | appearances        | NO          | bigint    | select,insert,update,references |
-| all_star_apperances       | PLAYER_ID          | NO          | int       | select,insert,update,references |
-| allstar_games             | GAME_ID            | NO          | int       | select,insert,update,references |
-| allstar_games             | DATE               | YES         | date      | select,insert,update,references |
-| allstar_games             | WINNING_TEAM       | YES         | text      | select,insert,update,references |
-| allstar_games             | WINNING_SCORE      | YES         | int       | select,insert,update,references |
-| allstar_games             | LOSING_TEAM        | YES         | text      | select,insert,update,references |
-| allstar_games             | LOSING_SCORE       | YES         | int       | select,insert,update,references |
-| allstar_roaster           | STATUS             | YES         | varchar   | select,insert,update,references |
-| allstar_roaster           | FGM                | YES         | longtext  | select,insert,update,references |
-| allstar_roaster           | FGA                | YES         | longtext  | select,insert,update,references |
-| allstar_roaster           | FG3M               | YES         | longtext  | select,insert,update,references |
-| allstar_roaster           | FG3A               | YES         | longtext  | select,insert,update,references |
-| allstar_roaster           | FTM                | YES         | longtext  | select,insert,update,references |
-| allstar_roaster           | FTA                | YES         | longtext  | select,insert,update,references |
-| allstar_roaster           | OREB               | YES         | int       | select,insert,update,references |
-| allstar_roaster           | DREB               | YES         | int       | select,insert,update,references |
-| allstar_roaster           | AST                | YES         | int       | select,insert,update,references |
-| allstar_roaster           | PF                 | YES         | int       | select,insert,update,references |
-| allstar_roaster           | STL                | YES         | int       | select,insert,update,references |
-| allstar_roaster           | TOV                | YES         | int       | select,insert,update,references |
-| allstar_roaster           | BLK                | YES         | int       | select,insert,update,references |
-| allstar_roaster           | PTS                | YES         | int       | select,insert,update,references |
-| allstar_roaster           | GAME_ID            | NO          | int       | select,insert,update,references |
-| allstar_roaster           | PLAYER_ID          | NO          | int       | select,insert,update,references |
-| draft_history             | DRAFT_ID           | NO          | int       | select,insert,update,references |
-| draft_history             | PLAYER_ID          | NO          | int       | select,insert,update,references |
-| draft_history             | SEASON             | YES         | int       | select,insert,update,references |
-| draft_history             | ROUND_NUMBER       | YES         | int       | select,insert,update,references |
-| draft_history             | ROUND_PICK         | YES         | int       | select,insert,update,references |
-| draft_history             | OVERALL_PICK       | YES         | int       | select,insert,update,references |
-| draft_history             | TEAM_ID            | NO          | int       | select,insert,update,references |
-| draft_history             | ORGANIZATION       | YES         | text      | select,insert,update,references |
-| games_by_teams            | SEASON_ID          | YES         | int       | select,insert,update,references |
-| games_by_teams            | TEAM_ID            | NO          | int       | select,insert,update,references |
-| games_by_teams            | GAME_ID            | NO          | int       | select,insert,update,references |
-| games_by_teams            | GAME_DATE          | YES         | date      | select,insert,update,references |
-| games_by_teams            | MATCHUP            | YES         | text      | select,insert,update,references |
-| games_by_teams            | WL                 | YES         | varchar   | select,insert,update,references |
-| games_by_teams            | MIN                | YES         | int       | select,insert,update,references |
-| games_by_teams            | PTS                | YES         | int       | select,insert,update,references |
-| games_by_teams            | FGM                | YES         | int       | select,insert,update,references |
-| games_by_teams            | FGA                | YES         | int       | select,insert,update,references |
-| games_by_teams            | FG3M               | YES         | int       | select,insert,update,references |
-| games_by_teams            | FG3A               | YES         | int       | select,insert,update,references |
-| games_by_teams            | FTM                | YES         | int       | select,insert,update,references |
-| games_by_teams            | FTA                | YES         | int       | select,insert,update,references |
-| games_by_teams            | OREB               | YES         | int       | select,insert,update,references |
-| games_by_teams            | DREB               | YES         | int       | select,insert,update,references |
-| games_by_teams            | AST                | YES         | int       | select,insert,update,references |
-| games_by_teams            | STL                | YES         | double    | select,insert,update,references |
-| games_by_teams            | BLK                | YES         | int       | select,insert,update,references |
-| games_by_teams            | TOV                | YES         | int       | select,insert,update,references |
-| games_by_teams            | PF                 | YES         | int       | select,insert,update,references |
-| hashtag_frequency         | HASHTAG            | YES         | varchar   | select,insert,update,references |
-| hashtag_frequency         | USER_NAME          | YES         | varchar   | select,insert,update,references |
-| hashtag_frequency         | TYPE               | YES         | text      | select,insert,update,references |
-| hashtag_frequency         | times              | NO          | bigint    | select,insert,update,references |
-| hashtags                  | ID                 | NO          | int       | select,insert,update,references |
-| hashtags                  | TWEET_ID           | NO          | double    | select,insert,update,references |
-| hashtags                  | HASHTAG            | YES         | varchar   | select,insert,update,references |
-| player_hashtag_popularity | USER_NAME          | YES         | varchar   | select,insert,update,references |
-| player_hashtag_popularity | HASHTAG            | YES         | varchar   | select,insert,update,references |
-| player_hashtag_popularity | times              | YES         | bigint    | select,insert,update,references |
-| player_id                 | FULL_NAME          | NO          | text      | select,insert,update,references |
-| player_id                 | PLAYER_ID          | NO          | int       | select,insert,update,references |
-| player_info               | RECORD_ID          | NO          | int       | select,insert,update,references |
-| player_info               | YEAR_START         | YES         | int       | select,insert,update,references |
-| player_info               | YEAR_END           | YES         | int       | select,insert,update,references |
-| player_info               | POSITION           | YES         | text      | select,insert,update,references |
-| player_info               | HEIGHT             | YES         | text      | select,insert,update,references |
-| player_info               | WEIGHT             | YES         | int       | select,insert,update,references |
-| player_info               | COLLEGE            | YES         | text      | select,insert,update,references |
-| player_info               | PLAYER_ID          | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | STATS_ID           | NO          | int       | select,insert,update,references |
-| player_regular_totalstats | PLAYER_ID          | NO          | int       | select,insert,update,references |
-| player_regular_totalstats | GP                 | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | GS                 | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | MIN                | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | FGM                | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | FGA                | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | FG3M               | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | FG3A               | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | FTM                | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | FTA                | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | OREB               | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | DREB               | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | REB                | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | AST                | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | STL                | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | BLK                | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | TOV                | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | PF                 | YES         | int       | select,insert,update,references |
-| player_regular_totalstats | PTS                | YES         | int       | select,insert,update,references |
-| player_tweets_popularity  | FULL_NAME          | NO          | varchar   | select,insert,update,references |
-| player_tweets_popularity  | USER_ID            | YES         | double    | select,insert,update,references |
-| player_tweets_popularity  | Total_TWEET        | YES         | bigint    | select,insert,update,references |
-| player_tweets_popularity  | Total_FAV          | YES         | decimal   | select,insert,update,references |
-| player_tweets_popularity  | FAVORITE_PER_TWEET | YES         | decimal   | select,insert,update,references |
-| stats_post_1995           | FULL_NAME          | YES         | text      | select,insert,update,references |
-| stats_post_1995           | PLAYER_ID          | NO          | int       | select,insert,update,references |
-| stats_post_1995           | GP                 | YES         | int       | select,insert,update,references |
-| stats_post_1995           | GS                 | YES         | int       | select,insert,update,references |
-| stats_post_1995           | MIN                | YES         | int       | select,insert,update,references |
-| stats_post_1995           | FGM                | YES         | int       | select,insert,update,references |
-| stats_post_1995           | FGA                | YES         | int       | select,insert,update,references |
-| stats_post_1995           | FG3M               | YES         | int       | select,insert,update,references |
-| stats_post_1995           | FG3A               | YES         | int       | select,insert,update,references |
-| stats_post_1995           | FTM                | YES         | int       | select,insert,update,references |
-| stats_post_1995           | FTA                | YES         | int       | select,insert,update,references |
-| stats_post_1995           | OREB               | YES         | int       | select,insert,update,references |
-| stats_post_1995           | DREB               | YES         | int       | select,insert,update,references |
-| stats_post_1995           | AST                | YES         | int       | select,insert,update,references |
-| stats_post_1995           | BLK                | YES         | int       | select,insert,update,references |
-| stats_post_1995           | TOV                | YES         | int       | select,insert,update,references |
-| stats_post_1995           | PF                 | YES         | int       | select,insert,update,references |
-| stats_post_1995           | PTS                | YES         | int       | select,insert,update,references |
-| teams                     | ABBREVIATION       | NO          | varchar   | select,insert,update,references |
-| teams                     | CITY               | YES         | text      | select,insert,update,references |
-| teams                     | FULL_NAME          | NO          | varchar   | select,insert,update,references |
-| teams                     | ID                 | NO          | int       | select,insert,update,references |
-| teams                     | NICKNAME           | YES         | text      | select,insert,update,references |
-| teams                     | STATE              | YES         | text      | select,insert,update,references |
-| teams                     | YEAR_FOUNDED       | YES         | int       | select,insert,update,references |
-| top_10_f3pct              | FULL_NAME          | YES         | text      | select,insert,update,references |
-| top_10_f3pct              | FG3M               | YES         | int       | select,insert,update,references |
-| top_10_f3pct              | FG3A               | YES         | int       | select,insert,update,references |
-| top_10_f3pct              | F3PCT              | YES         | decimal   | select,insert,update,references |
-| top_10_f3pct              | PTS                | YES         | int       | select,insert,update,references |
-| tweets                    | CREATED_AT         | YES         | text      | select,insert,update,references |
-| tweets                    | TWEET_ID           | NO          | double    | select,insert,update,references |
-| tweets                    | TWEET              | YES         | text      | select,insert,update,references |
-| tweets                    | USER_ID            | NO          | double    | select,insert,update,references |
-| tweets                    | RETWEET_COUNT      | YES         | int       | select,insert,update,references |
-| tweets                    | FAVORITE_COUNT     | YES         | int       | select,insert,update,references |
-| twitter_accounts          | FULL_NAME          | NO          | varchar   | select,insert,update,references |
-| twitter_accounts          | TWITTER_ACC        | NO          | text      | select,insert,update,references |
-| twitter_accounts          | ACCOUNT_TYPE       | YES         | text      | select,insert,update,references |
-| twitter_accounts          | USER_ID            | NO          | double    | select,insert,update,references |
-| win_post_1983             | FULL_NAME          | YES         | varchar   | select,insert,update,references |
-| win_post_1983             | WINS               | NO          | bigint    | select,insert,update,references |
-| win_post_1983             | TotalPTS           | YES         | decimal   | select,insert,update,references |
-| win_post_1983             | TotalREB           | YES         | decimal   | select,insert,update,references |
-| win_post_1983             | TotalAST           | YES         | decimal   | select,insert,update,references |
-| win_post_1983             | TotalSTL           | YES         | double    | select,insert,update,references |
-| win_post_1983             | TotalBLK           | YES         | decimal   | select,insert,update,references |
-| win_post_1983             | TotalTOV           | YES         | decimal   | select,insert,update,references |
-| win_post_1983             | Since              | YES         | date      | select,insert,update,references |
-| win_post_1983             | TEAM_ID            | NO          | int       | select,insert,update,references |
 
-153 rows in set (0.07 sec)
+| Tables_in_basketball |
+|----------------------|
+| age_perf             |
+| all_star_salary      |
+| Detail               |
+| Hashtag              |
+| hashtags             |
+| most_pop_tweet       |
+| nba_salary           |
+| nba_tweets           |
+| NBA_Twitter          |
+| nba_twitter_accounts |
+| new_age_perf         |
+| new_pop_hash         |
+| player_details       |
+| player_stats         |
+| pop_hash             |
+| POP_TEAM             |
+| Salary               |
+| Stats                |
+| teamnames            |
+| teamstats            |
+| top_players_team     |
+| Tweets               |
 
-2. Show all the player stats with their name and som calculated value.
-```mysql
-DELIMITER //
-CREATE PROCEDURE showStats(amount INT, orderWith TEXT)
-BEGIN
-  SET amount = IFNULL(amount,10);
-  SELECT p.FULL_NAME               Name,
-         -- s.FGM                     FGM,
-         -- s.FGA                     FGA,
-         ROUND(s.FGM / s.FGA, 2)   FGP,
-         -- s.FG3M                    FG3M,
-         -- s.FG3A                    FG3A,
-         ROUND(s.FG3M / s.FG3A, 2) FG3P,
-         -- s.FTM                     FTM,
-         -- s.FTA                     FTA,
-         ROUND(s.FTM / s.FTA, 2)   FTP,
-         s.AST                     Assist,
-         s.BLK                     Block,
-         s.OREB                    OREB,
-         s.DREB                    DREB,
-         s.REB                     Rebound,
-         PTS                       Points
-  FROM player_regular_totalstats s
-         LEFT JOIN player_id p ON s.PLAYER_ID = p.PLAYER_ID
-  ORDER BY CASE orderWith
-             WHEN "REB" THEN Rebound
-             WHEN "BLK" THEN Block
-             WHEN "AST" THEN Assist
-             ELSE Points END DESC
-  LIMIT amount;
-END;//
-DELIMITER ;
-```
-Test case:
-```mysql
-CALL showStats(10,"BLK");
-```
-Return:
+22 rows in set (0.01 sec)
 
-| Name                | FGP  | FG3P | FTP  | Assist | Block | OREB | DREB  | Rebound | Points |
-|:--------------------|------|------|------|--------|-------|------|-------|---------|-------:|
-| Hakeem Olajuwon     | 0.51 | 0.20 | 0.71 |   3058 |  3830 | 4034 |  9714 |   13748 |  26946 |
-| Dikembe Mutombo     | 0.52 | 0.00 | 0.68 |   1240 |  3289 | 3808 |  8551 |   12359 |  11729 |
-| Kareem Abdul-Jabbar | 0.56 | 0.06 | 0.72 |   5660 |  3189 | 2975 |  9394 |   17440 |  38387 |
-| Mark Eaton          | 0.46 | 0.00 | 0.65 |    840 |  3064 | 1857 |  5082 |    6939 |   5216 |
-| Tim Duncan          | 0.51 | 0.18 | 0.70 |   4225 |  3020 | 3859 | 11232 |   15091 |  26496 |
-| David Robinson      | 0.52 | 0.25 | 0.74 |   2441 |  2954 | 3083 |  7414 |   10497 |  20790 |
-| Patrick Ewing       | 0.50 | 0.15 | 0.74 |   2215 |  2894 | 2752 |  8855 |   11607 |  24815 |
-| Shaquille O'Neal    | 0.58 | 0.05 | 0.53 |   3026 |  2732 | 4209 |  8890 |   13099 |  28596 |
-| Tree Rollins        | 0.52 | 0.00 | 0.70 |    660 |  2542 | 2148 |  4602 |    6750 |   6249 |
-| Robert Parish       | 0.54 | 0.00 | 0.72 |   2180 |  2361 | 4598 | 10117 |   14715 |  23334 |
 
-3. Recalculate player favorite hashtags
-```mysql
-DELIMITER //
-CREATE PROCEDURE hashtagPopularity()
-BEGIN
-  SELECT maxfre.USER_NAME, hf.HASHTAG, maxfre.times
-  FROM (SELECT HASHTAG, temp.USER_NAME, MAX(temp.TYPE) TYPE, COUNT(*) times
-        FROM hashtags
-               LEFT JOIN (SELECT tweets.*,
-                                 twitter_accounts.FULL_NAME    AS USER_NAME,
-                                 twitter_accounts.ACCOUNT_TYPE AS TYPE
-                          FROM tweets
-                                 LEFT JOIN twitter_accounts ON tweets.USER_ID = twitter_accounts.USER_ID) temp
-                         on hashtags.TWEET_ID = temp.TWEET_ID
-        GROUP BY HASHTAG, USER_NAME) hf
-         INNER JOIN (
-    -- Find max appearance for each player
-    SELECT USER_NAME, MAX(times) times FROM hashtag_frequency hf WHERE TYPE = 'player' GROUP BY USER_NAME) maxfre
-                    ON (hf.times = maxfre.times AND hf.USER_NAME = maxfre.USER_NAME)
-  ORDER BY hf.times DESC;
-END;//
+| TABLE_NAME           | COLUMN_NAME             | DATA_TYPE  |
+|----------------------|-------------------------|------------|
+| age_perf             | age                     | int        |
+| age_perf             | eff                     | double     |
+| all_star_salary      | Player                  | text       |
+| all_star_salary      | Salary                  | double     |
+| all_star_salary      | Team                    | text       |
+| Detail               | BirthCity               | text       |
+| Detail               | BirthDate               | text       |
+| Detail               | College                 | text       |
+| Detail               | ExperienceYear          | int        |
+| Detail               | FirstName               | varchar    |
+| Detail               | Height                  | int        |
+| Detail               | JerseyNo                | int        |
+| Detail               | LastName                | varchar    |
+| Detail               | Personid                | int        |
+| Detail               | PhotoUrl                | text       |
+| Detail               | Position                | text       |
+| Detail               | Team                    | varchar    |
+| Detail               | Weight                  | int        |
+| Hashtag              | ht                      | mediumtext |
+| Hashtag              | id                      | bigint     |
+| hashtags             | id                      | bigint     |
+| hashtags             | N1                      | text       |
+| hashtags             | N2                      | text       |
+| hashtags             | N3                      | text       |
+| most_pop_tweet       | likes                   | int        |
+| most_pop_tweet       | team                    | text       |
+| most_pop_tweet       | Tweets                  | text       |
+| nba_salary           | AllStar                 | text       |
+| nba_salary           | Player                  | text       |
+| nba_salary           | Salary                  | double     |
+| nba_salary           | Team                    | text       |
+| nba_tweets           | #hashtag                | int        |
+| nba_tweets           | account                 | text       |
+| nba_tweets           | date                    | text       |
+| nba_tweets           | id                      | varchar    |
+| nba_tweets           | len                     | int        |
+| nba_tweets           | likes                   | int        |
+| nba_tweets           | retweets                | int        |
+| nba_tweets           | team                    | text       |
+| nba_tweets           | Tweets                  | text       |
+| NBA_Twitter          | #hashtag                | int        |
+| NBA_Twitter          | account                 | text       |
+| NBA_Twitter          | date                    | text       |
+| NBA_Twitter          | id                      | bigint     |
+| NBA_Twitter          | len                     | int        |
+| NBA_Twitter          | likes                   | int        |
+| NBA_Twitter          | N1                      | text       |
+| NBA_Twitter          | N2                      | text       |
+| NBA_Twitter          | N3                      | text       |
+| NBA_Twitter          | retweets                | int        |
+| NBA_Twitter          | team                    | text       |
+| NBA_Twitter          | Tweets                  | text       |
+| nba_twitter_accounts | Abbr                    | text       |
+| nba_twitter_accounts | Account                 | text       |
+| nba_twitter_accounts | Name                    | text       |
+| new_age_perf         | age                     | int        |
+| new_age_perf         | eff                     | double     |
+| new_pop_hash         | c1                      | bigint     |
+| new_pop_hash         | N1                      | text       |
+| player_details       | BirthCity               | text       |
+| player_details       | BirthDate               | text       |
+| player_details       | College                 | text       |
+| player_details       | ExperienceYear          | int        |
+| player_details       | Height                  | int        |
+| player_details       | JerseyNo                | int        |
+| player_details       | Personid                | int        |
+| player_details       | PhotoUrl                | text       |
+| player_details       | PlayerName              | text       |
+| player_details       | Pos                     | varchar    |
+| player_details       | Team                    | text       |
+| player_details       | Weight                  | int        |
+| player_stats         | 3P%                     | double     |
+| player_stats         | 3PA                     | double     |
+| player_stats         | 3PM                     | double     |
+| player_stats         | APG                     | double     |
+| player_stats         | BPG                     | double     |
+| player_stats         | DRB                     | double     |
+| player_stats         | FG%                     | double     |
+| player_stats         | FGA                     | double     |
+| player_stats         | FGM                     | double     |
+| player_stats         | FT%                     | double     |
+| player_stats         | FTA                     | double     |
+| player_stats         | FTM                     | double     |
+| player_stats         | GP                      | int        |
+| player_stats         | MPG                     | double     |
+| player_stats         | ORB                     | double     |
+| player_stats         | PF                      | double     |
+| player_stats         | Player                  | text       |
+| player_stats         | PPG                     | double     |
+| player_stats         | RPG                     | double     |
+| player_stats         | SPG                     | double     |
+| player_stats         | Team                    | text       |
+| player_stats         | TOV                     | double     |
+| pop_hash             | N1                      | text       |
+| pop_hash             | N2                      | text       |
+| pop_hash             | N3                      | text       |
+| POP_TEAM             | likes                   | int        |
+| POP_TEAM             | team                    | text       |
+| POP_TEAM             | Tweets                  | text       |
+| Salary               | AllStar                 | text       |
+| Salary               | Personid                | int        |
+| Salary               | Salary                  | double     |
+| Stats                | 3P%                     | double     |
+| Stats                | 3PA                     | double     |
+| Stats                | 3PM                     | double     |
+| Stats                | APG                     | double     |
+| Stats                | BPG                     | double     |
+| Stats                | DRB                     | double     |
+| Stats                | FG%                     | double     |
+| Stats                | FGA                     | double     |
+| Stats                | FGM                     | double     |
+| Stats                | FT%                     | double     |
+| Stats                | FTA                     | double     |
+| Stats                | FTM                     | double     |
+| Stats                | GP                      | int        |
+| Stats                | MPG                     | double     |
+| Stats                | ORB                     | double     |
+| Stats                | Personid                | int        |
+| Stats                | PF                      | double     |
+| Stats                | PPG                     | double     |
+| Stats                | RPG                     | double     |
+| Stats                | SPG                     | double     |
+| Stats                | TOV                     | double     |
+| teamnames            | Team                    | varchar    |
+| teamnames            | Team_Name               | text       |
+| teamstats            | Assists                 | double     |
+| teamstats            | Blocks                  | double     |
+| teamstats            | DefensiveRebounds       | double     |
+| teamstats            | FieldGoalsAttempted     | double     |
+| teamstats            | FieldGoalsMade          | double     |
+| teamstats            | FieldGoalsPercentage    | double     |
+| teamstats            | Fouls                   | double     |
+| teamstats            | FreeThrowsAttempted     | double     |
+| teamstats            | FreeThrowsMade          | double     |
+| teamstats            | FreeThrowsPercentage    | double     |
+| teamstats            | Losses                  | int        |
+| teamstats            | Minutes                 | int        |
+| teamstats            | OffensiveRebounds       | double     |
+| teamstats            | Points                  | double     |
+| teamstats            | Rebounds                | double     |
+| teamstats            | Steals                  | double     |
+| teamstats            | Team                    | text       |
+| teamstats            | ThreePointersAttempted  | double     |
+| teamstats            | ThreePointersMade       | double     |
+| teamstats            | ThreePointersPercentage | double     |
+| teamstats            | Turnovers               | double     |
+| teamstats            | TwoPointersAttempted    | double     |
+| teamstats            | TwoPointersMade         | double     |
+| teamstats            | TwoPointersPercentage   | double     |
+| teamstats            | Wins                    | int        |
+| top_players_team     | eff                     | double     |
+| top_players_team     | Player                  | text       |
+| top_players_team     | Team                    | text       |
+| top_players_team     | win_percentage          | decimal    |
+| Tweets               | #hashtag                | int        |
+| Tweets               | account                 | text       |
+| Tweets               | date                    | text       |
+| Tweets               | id                      | varchar    |
+| Tweets               | len                     | int        |
+| Tweets               | likes                   | int        |
+| Tweets               | retweets                | int        |
+| Tweets               | Tweets                  | text       |
+##### 4. find the top ten popular hashtags
+>```mysql
+>SELECT * FROM Hashtag;
+>DROP PROCEDURE tenpophash;
+>DELIMITER //
+>CREATE PROCEDURE tenpophash()
+>BEGIN
+>  SELECT 
+>        ht as hashtag, count(ht) as counts
+>    FROM
+>        Hashtag
+>    GROUP BY hashtag
+>    ORDER BY counts DESC
+>    LIMIT 10;
+>END;
+>//
+>DELIMITER ;
+>```
+Test:
+>```mysql
+>CALL tenpophash();
+>```
+Result:
+| hashtag            | counts |
+|--------------------|--------|
+| Knicks             |      3 |
+| MileHighBasketball |      3 |
+| Nuggets            |      3 |
+| RipCity            |      3 |
+| Rockets            |      3 |
+| WizHornets         |      2 |
+| NBA                |      2 |
+| sixers             |      2 |
+| TrueToAtlanta      |      2 |
+| FearTheDeer        |      2 |
 
-DELIMITER ;
-```
-Test case:
-```mysql
-CALL hashtagPopularity;
-```
-Return:
+##### 5. Show the likes of each account
+>```mysql
+>SELECT * FROM Tweets;
+>DROP PROCEDURE popaccount;
+>DELIMITER //
+>CREATE PROCEDURE popaccount()
+>BEGIN
+>  SELECT account , sum(likes) as pop
+>  FROM Tweets
+>  GROUP BY account
+>  ORDER BY pop DESC;
+>END;
+>//
+>DELIMITER ;
+>```
+Test:
+>```mysql
+>CALL popaccount();
+>```
+Result:
+| account          | pop    |
+|------------------|--------|
+| @Warriors        | 407761 |
+| @Lakers          | 245205 |
+| @Celtics         | 231208 |
+| @Sixers          | 208038 |
+| @OKCthunder      | 141801 |
+| @Spurs           | 137395 |
+| @Dallasmavs      | 116321 |
+| @Raptors         | 109104 |
+| @MiamiHeat       |  91720 |
+| @HoustonRockets  |  89263 |
+| @RoyceYoung      |  66444 |
+| @ChicagoBulls    |  65694 |
+| @BrooklynNets    |  62963 |
+| @Timberwolves    |  59959 |
+| @NYKnicks        |  57387 |
+| @UtahJazz        |  54552 |
+| @Trailblazers    |  48810 |
+| @AnthonyVslater  |  47534 |
+| @LaClippers      |  45907 |
+| @LakersReporter  |  45222 |
+| @Suns            |  42907 |
+| @Taniaganguli    |  41038 |
+| @Pacers          |  36543 |
+| @Bucks           |  35199 |
+| @Nuggets         |  34753 |
+| @SacramentoKings |  32181 |
+| @DetroitPistons  |  29054 |
+| @Mike_bresnahan  |  27799 |
+| @ATLHawks        |  24903 |
+| @JLew1050        |  24097 |
+| @OrlandoMagic    |  19763 |
+| @WashWizards     |  16608 |
+| @AdamHimmelsbach |  16573 |
+| @ByJayKing       |  14178 |
+| @Andyblarsen     |  14035 |
+| @KellyIkoNBA     |  13470 |
+| @memgrizz        |  12623 |
+| @patboylanpacers |  11410 |
+| @cavsjoeg        |  11273 |
+| @StephNoh        |  10623 |
+| @kcjhoop         |  10219 |
+| @APOOCH          |  10108 |
+| @DerekBodnerNBA  |   9866 |
+| @Hornets         |   8018 |
+| @PompeyOnSixers  |   7843 |
+| @Samsmithhoops   |   7789 |
+| @KatyWinge       |   7546 |
+| @EthanJSkolnick  |   7535 |
+| @ErikHorneOK     |   7351 |
+| @joevardon       |   7262 |
+| @DanWoikeSports  |   6979 |
+| @ESefko          |   6624 |
+| @Jonathan_Feigen |   6596 |
+| @PelicansNBA     |   6432 |
+| @Chrisadempsey   |   6396 |
+| @CHold           |   6264 |
+| @Sunscommunity   |   6247 |
+| @Con_chron       |   6222 |
+| @IraHeatBeat     |   6060 |
+| @Matt_velazquez  |   5957 |
+| @Tribjazz        |   5473 |
+| @Wolstatsun      |   4968 |
+| @Geoff_calkins   |   4888 |
+| @JoshuaBRobbins  |   4760 |
+| @Poundingtherock |   4727 |
+| @JMcDonald_SAEN  |   4473 |
+| @CvivlamoreAJC   |   4432 |
+| @SmithRaps       |   4364 |
+| @DetnewsRodBeard |   4234 |
+| @MFollowill      |   4156 |
+| @Keith_langlois  |   4001 |
+| @Scottagness     |   3988 |
+| @MikeVorkunov    |   3760 |
+| @MikeGrich       |   3694 |
+| @kayte_c         |   3603 |
+| @TJMcBrideNBA    |   3563 |
+| @SixersBeat      |   3026 |
+| @MyMikeCheck     |   2951 |
+| @ginamizell      |   2883 |
+| @FredKatz        |   2874 |
+| @ReedWallach     |   2830 |
+| @DwainPrice      |   2644 |
+| @PDcavsinsider   |   2606 |
+| @GeraldBourguet  |   2179 |
+| @CAGrizBeat      |   1911 |
+| @NetsDaily       |   1865 |
+| @Mcristaldi      |   1772 |
+| @JohnDenton555   |   1576 |
+| @Jim_Eichenhofer |   1571 |
+| @ChristopherHine |   1351 |
+| @mr_jasonjones   |   1306 |
+| @FlyerGrizBlog   |   1292 |
+| @CandaceDBuckner |   1228 |
+| @Vincent_ellis56 |    827 |
+| @PelicansCR      |    809 |
+| @StevePopper     |    783 |
+| @Rick_bonnell    |    708 |
+| @cf_gardner      |    666 |
+| @MRidenourABJ    |    567 |
+| @atl_hawksnation |    501 |
+| @JeffGSpursZone  |    501 |
+| @Zacharysrosen   |    231 |
+| @nuggetsnews     |    201 |
 
-| USER_NAME             | HASHTAG            | times |
-|:----------------------|--------------------|------:|
-| Russell Westbrook     | whynot             |  2655 |
-| Stephen Curry         | DubNation          |   816 |
-| LeBron James          | Striveforgreatness |   786 |
-| James Harden          | ThunderUp          |   564 |
-| Luka Doncic           | halamadrid         |   507 |
-| Jayson Tatum          | Duke               |   393 |
-| Joel Embiid           | kubball            |   288 |
-| Gordon Hayward        | improveeveryday    |   287 |
-| Carmelo Anthony       | STAYME7O           |   270 |
-| Paul George           | PacerNation        |   246 |
-| Kevin Durant          | KDIV               |   181 |
-| Derrick Rose          | OneLastDance       |   154 |
-| Paul Pierce           | FitClub34          |   145 |
-| Kyrie Irving          | UncleDrew          |   113 |
-| Jaylen Brown          | pause              |   106 |
-| Chris Paul            | TeamCP3            |    92 |
-| Kobe Bryant           | MambaMentality     |    73 |
-| Klay Thompson         | Dubnation          |    61 |
-| Giannis Antetokounmpo | NBAVote            |    49 |
-| Dwyane Wade           | TheReturn          |    34 |
-
-4. Show popularity of all account in the database
-```mysql
-DELIMITER //
-CREATE PROCEDURE showPopularUser()
-BEGIN
-  SELECT twitter_accounts.FULL_NAME, likes.FAVORITE_PER_TWEET, likes.Total_FAV
-  FROM twitter_accounts
-         LEFT JOIN (SELECT USER_ID,
-                           COUNT(*)                       AS Total_TWEET,
-                           SUM(FAVORITE_COUNT)            AS Total_FAV,
-                           SUM(FAVORITE_COUNT) / COUNT(*) AS FAVORITE_PER_TWEET
-                    FROM tweets
-                    GROUP BY USER_ID
-                    ORDER BY FAVORITE_PER_TWEET DESC) likes ON twitter_accounts.USER_ID = likes.USER_ID
-  ORDER BY FAVORITE_PER_TWEET DESC;
-
-END;//
-
-DELIMITER ;
-```
-Test case:
-```mysql
-CALL showPopularUser();
-```
-Return:
-
-| FULL_NAME                  | FAVORITE_PER_TWEET | Total_FAV |
-|:---------------------------|--------------------|----------:|
-| LeBron James               |         10965.6073 |  35210565 |
-| Dwyane Wade                |          7542.4384 |    550598 |
-| Kobe Bryant                |          7431.0733 |  12060632 |
-| Stephen Curry              |          4726.6536 |  15323811 |
-| Joel Embiid                |          3615.4334 |   9277202 |
-| Derrick Rose               |          2992.6783 |   9609490 |
-| NBA on ESPN                |          1814.6775 |   5874111 |
-| Golden State Warriors      |          1673.6285 |   5429251 |
-| Los Angeles Lakers         |          1528.8495 |   4968761 |
-| Kevin Durant               |          1520.7773 |   4861925 |
-| Klay Thompson              |          1446.5665 |    794165 |
-| NBA on TNTVerified account |          1445.3867 |   4675826 |
-| Giannis Antetokounmpo      |          1325.9045 |   1430651 |
-| Boston Celtics             |          1175.5571 |   3766485 |
-| Russell Westbrook          |          1162.9021 |   3755011 |
-| Chris Paul                 |          1130.7235 |   3644322 |
-| Oklahoma City Thunder      |           977.5701 |   3160484 |
-| Paul Pierce                |           858.2502 |   1386074 |
-| Philadelphia 76ers         |           836.6944 |   2699176 |
-| San Antonio Spurs          |           796.7956 |   2584805 |
-| James Harden               |           706.2837 |   2275646 |
-| Luka Doncic                |           684.2783 |   2148634 |
-| Houston Rockets            |           656.0720 |   2104679 |
-| Toronto Raptors            |           646.0882 |   2073297 |
-| Gordon Hayward             |           573.2431 |   1476101 |
-| Paul George                |           539.3915 |   1694768 |
-| Carmelo Anthony            |           507.9635 |   1433981 |
-| Chicago Bulls              |           477.9640 |   1552427 |
-| Miami Heat                 |           475.4335 |   1525666 |
-| Kyrie Irving               |           471.5825 |   1496803 |
-| Timberwolves               |           457.5392 |   1472361 |
-| Dallas Mavericks           |           445.1079 |   1435473 |
-| New York Knicks            |           436.8454 |   1415379 |
-| Jaylen Brown               |           401.6098 |   1053021 |
-| Jayson Tatum               |           392.0559 |   1226351 |
-| Cleveland Cavaliers        |           343.7219 |   1113659 |
-| Utah Jazz                  |           250.8259 |    808161 |
-| Milwaukee Bucks            |           239.9268 |    777123 |
-| Sacramento Kings           |           236.1617 |    762330 |
-| Indiana Pacers             |           228.1043 |    736777 |
-| Portland Trail Blazers     |           218.6403 |    705115 |
-| Brooklyn Nets              |           209.8916 |    672073 |
-| Phoenix Suns               |           208.0875 |    668377 |
-| Denver Nuggets             |           189.1141 |    611784 |
-| Los Angeles Clippers       |           171.1645 |    550294 |
-| Atlanta Hawks              |           145.7205 |    472863 |
-| ClutchFans                 |           122.2711 |    395547 |
-| Washington Wizards         |           117.3920 |    379998 |
-| Memphis Grizzlies          |           110.8890 |    355510 |
-| Orlando Magic              |           102.5611 |    331375 |
-| Detroit Pistons            |            98.0844 |    316028 |
-| Charlotte Hornets          |            83.5071 |    270229 |
-| New Orleans Pelicans       |            72.2758 |    231427 |
-| Fastbreak Breakfast        |            14.4711 |     46351 |
-| CBS Sports NBA             |            10.4846 |     34033 |
-| The Step Back              |             4.2150 |     13682 |
-| NBA UK Fans                |             1.9128 |      6144 |
-| Cameron Tabatabaie         |             1.8285 |      5919 |
-| FanSided NBA               |             1.3924 |      4499 |
-| The Drop NBA               |             0.0558 |       181 |
-
-5. Get player with twitter(in this database) general info
-```mysql
-DELIMITER //
-CREATE PROCEDURE showplayerInfo()
-BEGIN
-  SELECT p.FULL_NAME, t.TWITTER_ACC, p.HEIGHT, p.WEIGHT, p.YEAR_END - p.YEAR_START AS Years, p.POSITION
-  FROM twitter_accounts t
-         INNER JOIN (SELECT player_info.*, player_id.FULL_NAME
-                     FROM player_info
-                            LEFT JOIN player_id ON player_info.PLAYER_ID = player_id.PLAYER_ID) p ON
-    t.FULL_NAME = p.FULL_NAME
-  WHERE t.ACCOUNT_TYPE = 'player';
-
-END;//
-
-DELIMITER ;
-```
-Test case:
-```mysql
-CALL showplayerInfo();
-```
-Return:
-
-| FULL_NAME         | TWITTER_ACC    | HEIGHT | WEIGHT | Years | POSITION |
-|:------------------|----------------|--------|--------|-----------------|---------:|
-| Carmelo Anthony   | carmeloanthony | 6-8    |    240 |              14 | F        |
-| Jaylen Brown      | FCHWPO         | 6-7    |    225 |               1 | F-G      |
-| Stephen Curry     | StephenCurry30 | 6-3    |    190 |               8 | G        |
-| Kevin Durant      | KDTrey5        | 6-9    |    240 |              10 | F-G      |
-| Joel Embiid       | JoelEmbiid     | 7-0    |    250 |               1 | C-F      |
-| Paul George       | Yg_Trece       | 6-9    |    220 |               7 | F        |
-| James Harden      | JHarden13      | 6-5    |    220 |               8 | G        |
-| Gordon Hayward    | gordonhayward  | 6-8    |    226 |               7 | F-G      |
-| Kyrie Irving      | KyrieIrving    | 6-3    |    193 |               6 | G        |
-| Chris Paul        | CP3            | 6-0    |    175 |              12 | G        |
-| Paul Pierce       | paulpierce34   | 6-7    |    235 |              18 | F-G      |
-| Derrick Rose      | drose          | 6-3    |    190 |               9 | G        |
-| Jayson Tatum      | jaytatum0      | 6-8    |    205 |               0 | F        |
-| Klay Thompson     | KlayThompson   | 6-7    |    215 |               6 | G-F      |
-| Dwyane Wade       | DwyaneWade     | 6-4    |    220 |              14 | G        |
-| Russell Westbrook | russwest44     | 6-3    |    200 |               9 | G        |
 
 ## Contribution
-This is an individual assignment all the work is done by me personally.
-The works include normalize the database, create view for use case, create index to improve performance,
- create 5 functions and create 5 procedures.
- 
+All by myself.
+
 ## References
-All the material used to lean normalization, index, function and procedure are provided by Prof. Brown.
-
-Tutorial example by Prof.Brown: [Link](https://github.com/nikbearbrown/INFO_6210/blob/master/Assingments/INFO_6210_SP19_Assignment_3.pdf)<br/>
-Last accessed on Mar.24.2019<br/>
+Tutorial by Prof.Brown: [Link](https://github.com/nikbearbrown/INFO_6210/blob/master/Assingments/INFO_6210_SP19_Assignment_3.pdf)<br/>
 
 
- 
