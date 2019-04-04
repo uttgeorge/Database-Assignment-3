@@ -715,13 +715,7 @@ Result(Only show first 10):\
 https://t.co/lsLS3DNtyp                                  | @atl_hawksnation |
 | RT @ATLHawks: @BleacherReport admiring our twitter account                                                                                    | @atl_hawksnation |
 | Our @atlhawks win against the @memgrizz! #ATLHawks #TruetoAtlanta #HawksvsGrizzlies https://t.co/L6lpZFNmC5                                   | @atl_hawksnation |
-| RT @ATLHawks: oh
-.
-.
-.
-.
-.
-OOOOHHHH. 😱 https://t.co/WVq9MxO7sU                                                                                 | @atl_hawksnation |
+| RT @ATLHawks: oh OOOOHHHH. 😱 https://t.co/WVq9MxO7sU                                                                                 | @atl_hawksnation |
 | Facebook and Instagram been tripping Alll day                                                                                                 | @atl_hawksnation |
 | @TheTraeYoung Big facts                                                                                                                       | @atl_hawksnation |
 | RT @TheTraeYoung: Whoever is trying to bring you down, is already below you💯                                                                   | @atl_hawksnation |
