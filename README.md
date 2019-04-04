@@ -710,9 +710,7 @@ Result(Only show first 10):\
 
 | Tweets                                                                                                                                        | Account          |
 |-----------------------------------------------------------------------------------------------------------------------------------------------|------------------|
-| RT @ESPNNBA: Trae Young didn't even cross half court before throwing this alley-oop 😳
-
-(📍 @StateFarm) https://t.co/sMIYzRkTPi                   | @atl_hawksnation |
+| RT @ESPNNBA: Trae Young didn't even cross half court before throwing this alley-oop 😳(📍 @StateFarm) https://t.co/sMIYzRkTPi                   | @atl_hawksnation |
 | RT @YahooSportsNBA: Trae Young throws a 60 foot lob to John Collins!
 
 (via @ESPNNBA)
