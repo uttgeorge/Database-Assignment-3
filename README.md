@@ -355,9 +355,7 @@ Result (Only show first 5):\
 | Los Angeles Lakers    | 👀 @kylekuzma with his @ZO2_ impression https://t.co/QchoNtuboj                                                              | 19403 |
 | Oklahoma City Thunder | PAUL. GEORGE.                                                                                                              | 13198 |
 | Toronto Raptors       | For all the good times 
-For all you’ve done for this City, for Canada
-
-Thank you, @DeMar_DeRozan https://t.co/uxFLPQv1Sw   | 19331 |
+For all you’ve done for this City, for Canada Thank you, @DeMar_DeRozan https://t.co/uxFLPQv1Sw   | 19331 |
 
 
 ##### User Case 5:
