@@ -354,8 +354,7 @@ Result (Only show first 5):\
 | Golden State Warriors | drip on 100,000 💧 https://t.co/ylURP2b3wd                                                                                   | 26647 |
 | Los Angeles Lakers    | 👀 @kylekuzma with his @ZO2_ impression https://t.co/QchoNtuboj                                                              | 19403 |
 | Oklahoma City Thunder | PAUL. GEORGE.                                                                                                              | 13198 |
-| Toronto Raptors       | For all the good times 
-For all you’ve done for this City, for Canada Thank you, @DeMar_DeRozan https://t.co/uxFLPQv1Sw   | 19331 |
+| Toronto Raptors       | For all the good times For all you’ve done for this City, for Canada Thank you, @DeMar_DeRozan https://t.co/uxFLPQv1Sw   | 19331 |
 
 
 ##### User Case 5:
